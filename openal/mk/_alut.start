@@ -1,0 +1,46 @@
+import ctypes
+import ctypes.util
+
+lib = ctypes.CDLL(ctypes.util.find_library("alut"))
+
+ERROR_NO_ERROR = 0
+ERROR_OUT_OF_MEMORY = 0x200
+ERROR_INVALID_ENUM = 0x201
+ERROR_INVALID_VALUE = 0x202
+ERROR_INVALID_OPERATION = 0x203
+ERROR_NO_CURRENT_CONTEXT = 0x204
+ERROR_AL_ERROR_ON_ENTRY = 0x205
+ERROR_ALC_ERROR_ON_ENTRY = 0x206
+ERROR_OPEN_DEVICE = 0x207
+ERROR_CLOSE_DEVICE = 0x208
+ERROR_CREATE_CONTEXT = 0x209
+ERROR_MAKE_CONTEXT_CURRENT = 0x20A
+ERROR_DESTROY_CONTEXT = 0x20B
+ERROR_GEN_BUFFERS = 0x20C
+ERROR_BUFFER_DATA = 0x20D
+ERROR_IO_ERROR = 0x20E
+ERROR_UNSUPPORTED_FILE_TYPE = 0x20F
+ERROR_UNSUPPORTED_FILE_SUBTYPE = 0x210
+ERROR_CORRUPT_OR_TRUNCATED_DATA = 0x211
+WAVEFORM_SINE = 0x100
+WAVEFORM_SQUARE = 0x101
+WAVEFORM_SAWTOOTH = 0x102
+WAVEFORM_WHITENOISE = 0x103
+WAVEFORM_IMPULSE = 0x104
+LOADER_BUFFER = 0x300
+LOADER_MEMORY = 0x301
+
+errors = {}
+for k, v in locals().items():
+    if not isinstance(v, int) or not v: continue
+    assert v not in errors
+    errors[v] = k.replace('_', ' ').lower()
+
+class ALUTError(Exception):
+    pass
+
+def check_error(result, func, arguments):
+    err = GetError()
+    if err:
+        raise ALUTError, errors[err]
+    return result
