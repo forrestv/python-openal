@@ -24,6 +24,7 @@ class _NoSetAttr(object):
 
 class Device(_NoSetAttr):
     def __init__(self, name=None):
+        print repr(_alc.GetString(0, _alc.ALC_DEVICE_SPECIFIER))
         self._handle = _alc.OpenDevice(name)
     def __del__(self):
         if hasattr(self, "_handle"):
@@ -41,6 +42,7 @@ class ContextListener(_NoSetAttr):
         self._handle = _alc.CreateContext(self._device._handle, None) # XXX
         _alc.MakeContextCurrent(self._handle)
     def __del__(self):
+        _alc.MakeContextCurrent(0)
         if hasattr(self, "_handle"):
             try:
                 _alc.DestroyContext(self._handle)

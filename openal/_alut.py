@@ -34,7 +34,9 @@ errors = {}
 for k, v in locals().items():
     if not isinstance(v, int) or not v: continue
     assert v not in errors
-    errors[v] = k.replace('_', ' ').lower()
+    k = k.replace('_', ' ').lower()
+    if not k.startswith('error '): continue
+    errors[v] = k[len('error '):]
 
 class ALUTError(Exception):
     pass
