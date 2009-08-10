@@ -24,7 +24,7 @@ class _NoSetAttr(object):
 
 class Device(_NoSetAttr):
     def __init__(self, name=None):
-        print repr(_alc.GetString(0, _alc.ALC_DEVICE_SPECIFIER))
+        #print repr(_alc.GetString(0, _alc.ALC_DEVICE_SPECIFIER))
         self._handle = _alc.OpenDevice(name)
     def __del__(self):
         if hasattr(self, "_handle"):
@@ -130,7 +130,12 @@ class Source(_NoSetAttr):
         raise NotImplementedError
     def play(self):
         _al.SourcePlay(self._handle)
-    #def play, pause, stop, rewind(self):
+    def pause(self):
+        _al.SourcePause(self._handle)
+    def stop(self):
+        _al.SourceStop(self._handle)
+    def rewindy(self):
+        _al.SourceRewind(self._handle)
     
     position = property(
         lambda self: call_array(ctypes.c_float, 3, _al.GetSourcefv, self._handle, _al.POSITION),
@@ -217,9 +222,12 @@ class Source(_NoSetAttr):
     )
 
 class Buffer(_NoSetAttr):
-    def __init__(self, filename=None):
+    def __init__(self, filename=None, data=None):
+        assert filename is None or data is None
         if filename is not None:
             self._handle = _alut.CreateBufferFromFile(filename)
+        elif data is not None:
+            self._handle = _alut.CreateBufferFromFileImage(data, len(data))
         else:
             x = ctypes.c_uint()
             _al.GenBuffers(1, ctypes.byref(x))
