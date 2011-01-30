@@ -38,28 +38,28 @@ for k, v in locals().items():
     if not k.startswith('error '): continue
     errors[v] = k[len('error '):]
 
-class ALUTError(Exception):
+class Error(Exception):
     pass
 
 def check_error(result, func, arguments):
     err = GetError()
     if err:
-        raise ALUTError, errors[err]
+        raise Error(errors[err])
     return result
 
 Init = lib.alutInit
 Init.argtypes = [ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_char_p)]
-Init.restype = ctypes.c_char
+Init.restype = ctypes.c_bool
 Init.errcheck = check_error
 
 InitWithoutContext = lib.alutInitWithoutContext
 InitWithoutContext.argtypes = [ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_char_p)]
-InitWithoutContext.restype = ctypes.c_char
+InitWithoutContext.restype = ctypes.c_bool
 InitWithoutContext.errcheck = check_error
 
 Exit = lib.alutExit
 Exit.argtypes = []
-Exit.restype = ctypes.c_char
+Exit.restype = ctypes.c_bool
 Exit.errcheck = check_error
 
 GetError = lib.alutGetError
@@ -128,5 +128,5 @@ GetMinorVersion.errcheck = check_error
 
 Sleep = lib.alutSleep
 Sleep.argtypes = [ctypes.c_float]
-Sleep.restype = ctypes.c_char
+Sleep.restype = ctypes.c_bool
 Sleep.errcheck = check_error
