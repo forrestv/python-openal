@@ -42,7 +42,7 @@ class ContextListener(_NoSetAttr):
         self._handle = _alc.CreateContext(self._device._handle, None) # XXX
         _alc.MakeContextCurrent(self._handle)
     def __del__(self):
-        _alc.MakeContextCurrent(0)
+        _alc.MakeContextCurrent(None)
         if hasattr(self, "_handle"):
             try:
                 _alc.DestroyContext(self._handle)
