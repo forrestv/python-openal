@@ -11,9 +11,9 @@ contextlistener = device.ContextListener()
 source = openal.Source()
 source2 = openal.Source()
 expsources = [openal.Source() for i in xrange(20)]
-buffer = openal.Buffer('sound.wav')
-buffer2 = openal.Buffer('water.wav')
-expbuffers = [openal.Buffer(os.path.join('explodes', x)) for x in os.listdir('explodes') if x[0] != '.']
+buffer = openal.Buffer(os.path.join('sounds', '440.wav'))
+buffer2 = openal.Buffer(os.path.join('sounds', 'water.wav'))
+expbuffers = [openal.Buffer(os.path.join('sounds', 'explodes', x)) for x in os.listdir(os.path.join('sounds', 'explodes')) if x[0] != '.']
 
 contextlistener.position = 0, 0, 0
 contextlistener.velocity = 0, 0, 0

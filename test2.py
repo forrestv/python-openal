@@ -9,7 +9,7 @@ import openal
 device = openal.Device()
 contextlistener = device.ContextListener()
 source = openal.Source()
-buffer = openal.Buffer('sound.wav')
+buffer = openal.Buffer(os.path.join('sounds', '440.wav'))
 
 contextlistener.position = 0, 0, 0
 contextlistener.velocity = 0, 0, 0
