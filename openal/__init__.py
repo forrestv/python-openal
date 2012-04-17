@@ -25,7 +25,7 @@ def call_array(atype, elements, func, *args):
 class _NoSetAttr(object):
     def __setattr__(self, key, value):
         if key[0] != '_' and not hasattr(self, key):
-            raise AttributeError
+            raise AttributeError(key)
         object.__setattr__(self, key, value)
 
 class Device(_NoSetAttr):
