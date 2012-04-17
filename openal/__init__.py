@@ -10,17 +10,16 @@ def call_on_del(obj, func, *args, **kwargs):
     x = max(_refs.iterkeys()) + 1 if _refs else 0
     _refs[x] = weakref.ref(obj, lambda ref: (_refs.pop(x), func(*args, **kwargs)))
 
-def call_array_fill(atype, elements, func, *args):
-    x = (atype * len(elements))()
-    for k, v in enumerate(elements):
+def call_array_fill(atype, contents, func, *args):
+    x = (atype * len(contents))()
+    for k, v in enumerate(contents):
         x[k] = v
     func(*list(args)+[x])
-    return [x[y] for y in xrange(len(elements))]
 
-def call_array(atype, elements, func, *args):
-    x = (atype * elements)()
+def call_array(atype, count, func, *args):
+    x = (atype * count)()
     func(*list(args)+[x])
-    return [x[y] for y in xrange(elements)]
+    return [x[y] for y in xrange(count)]
 
 class _NoSetAttr(object):
     def __setattr__(self, key, value):
@@ -110,17 +109,16 @@ class ContextListener(_NoSetAttr):
     orientation = property(
         lambda self: call_array(ctypes.c_float, 6, _al.GetListenerfv, _al.ORIENTATION),
         lambda self, v: call_array_fill(ctypes.c_float, v, _al.Listenerfv, _al.ORIENTATION),
-    ) # forward, up
+        doc='forward, up',
+    )
 
 class Source(_NoSetAttr):
     def __init__(self, cl):
         self._cl = cl
         self._buffer = None
         
-        x = ctypes.c_uint()
-        _al.GenSources(1, ctypes.byref(x))
-        self._handle = x.value
-        call_on_del(self, _al.DeleteSources, 1, ctypes.byref(ctypes.c_uint(self._handle)))
+        self._handle, = call_array(ctypes.c_uint, 1, _al.GenSources, 1)
+        call_on_del(self, call_array_fill, ctypes.c_uint, [self._handle], _al.DeleteSources, 1)
     
     def queue_buffers(self, buffers):
         raise NotImplementedError
@@ -233,18 +231,16 @@ class Buffer(_NoSetAttr):
             self._handle = _alut.CreateBufferFromFileImage(data, len(data))
         else:
             channels, bits, frequency, data2 = rawdata
-            x = ctypes.c_uint()
-            _al.GenBuffers(1, ctypes.byref(x))
-            self._handle = x.value
             format = {
                 (1, 8): _al.FORMAT_MONO8,
                 (1, 16): _al.FORMAT_MONO16,
                 (2, 8): _al.FORMAT_STEREO8,
                 (2, 16): _al.FORMAT_STEREO16,
             }[channels, bits]
+            self._handle, = call_array(ctypes.c_uint, 1, _al.GenBuffers, 1)
             _al.BufferData(self._handle, format, data2, len(data2), frequency)
         
-        call_on_del(self, _al.DeleteBuffers, 1, ctypes.byref(ctypes.c_uint(self._handle)))
+        call_on_del(self, call_array_fill, ctypes.c_uint, [self._handle], _al.DeleteBuffers, 1)
     
     frequency = property(
         lambda self: call_array(ctypes.c_int, 1, _al.GetBufferi, self._handle, _al.FREQUENCY)[0],
