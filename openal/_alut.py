@@ -52,17 +52,17 @@ def check_error(result, func, arguments):
 
 Init = lib.alutInit
 Init.argtypes = [ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_char_p)]
-Init.restype = ctypes.c_char
+Init.restype = ctypes.c_uint8
 Init.errcheck = check_error
 
 InitWithoutContext = lib.alutInitWithoutContext
 InitWithoutContext.argtypes = [ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_char_p)]
-InitWithoutContext.restype = ctypes.c_char
+InitWithoutContext.restype = ctypes.c_uint8
 InitWithoutContext.errcheck = check_error
 
 Exit = lib.alutExit
 Exit.argtypes = []
-Exit.restype = ctypes.c_char
+Exit.restype = ctypes.c_uint8
 Exit.errcheck = check_error
 
 GetError = lib.alutGetError
@@ -131,5 +131,5 @@ GetMinorVersion.errcheck = check_error
 
 Sleep = lib.alutSleep
 Sleep.argtypes = [ctypes.c_float]
-Sleep.restype = ctypes.c_char
+Sleep.restype = ctypes.c_uint8
 Sleep.errcheck = check_error

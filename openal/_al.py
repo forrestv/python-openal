@@ -99,7 +99,7 @@ Disable.errcheck = check_error
 
 IsEnabled = lib.alIsEnabled
 IsEnabled.argtypes = [ctypes.c_int]
-IsEnabled.restype = ctypes.c_char
+IsEnabled.restype = ctypes.c_uint8
 IsEnabled.errcheck = check_error
 
 GetString = lib.alGetString
@@ -108,7 +108,7 @@ GetString.restype = ctypes.c_char_p
 GetString.errcheck = check_error
 
 GetBooleanv = lib.alGetBooleanv
-GetBooleanv.argtypes = [ctypes.c_int, ctypes.c_char_p]
+GetBooleanv.argtypes = [ctypes.c_int, ctypes.POINTER(ctypes.c_uint8)]
 GetBooleanv.restype = None
 GetBooleanv.errcheck = check_error
 
@@ -129,7 +129,7 @@ GetDoublev.errcheck = check_error
 
 GetBoolean = lib.alGetBoolean
 GetBoolean.argtypes = [ctypes.c_int]
-GetBoolean.restype = ctypes.c_char
+GetBoolean.restype = ctypes.c_uint8
 GetBoolean.errcheck = check_error
 
 GetInteger = lib.alGetInteger
@@ -153,7 +153,7 @@ GetError.restype = ctypes.c_int
 
 IsExtensionPresent = lib.alIsExtensionPresent
 IsExtensionPresent.argtypes = [ctypes.c_char_p]
-IsExtensionPresent.restype = ctypes.c_char
+IsExtensionPresent.restype = ctypes.c_uint8
 IsExtensionPresent.errcheck = check_error
 
 GetProcAddress = lib.alGetProcAddress
@@ -238,7 +238,7 @@ DeleteSources.errcheck = check_error
 
 IsSource = lib.alIsSource
 IsSource.argtypes = [ctypes.c_uint]
-IsSource.restype = ctypes.c_char
+IsSource.restype = ctypes.c_uint8
 IsSource.errcheck = check_error
 
 Sourcef = lib.alSourcef
@@ -363,7 +363,7 @@ DeleteBuffers.errcheck = check_error
 
 IsBuffer = lib.alIsBuffer
 IsBuffer.argtypes = [ctypes.c_uint]
-IsBuffer.restype = ctypes.c_char
+IsBuffer.restype = ctypes.c_uint8
 IsBuffer.errcheck = check_error
 
 BufferData = lib.alBufferData

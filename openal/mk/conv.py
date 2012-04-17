@@ -16,6 +16,8 @@ types = {
  'float*': 'ctypes.POINTER(ctypes.c_float)',
  'double': 'ctypes.c_double',
  'double*': 'ctypes.POINTER(ctypes.c_double)',
+ 'bool': 'ctypes.c_uint8',
+ 'bool*': 'ctypes.POINTER(ctypes.c_uint8)',
 }
 st = sys.argv[2]
 for line in open(sys.argv[1]):

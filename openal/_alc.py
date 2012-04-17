@@ -52,7 +52,7 @@ CreateContext.errcheck = check_error
 
 MakeContextCurrent = lib.alcMakeContextCurrent
 MakeContextCurrent.argtypes = [ctypes.c_void_p]
-MakeContextCurrent.restype = ctypes.c_char
+MakeContextCurrent.restype = ctypes.c_uint8
 MakeContextCurrent.errcheck = check_error
 
 ProcessContext = lib.alcProcessContext
@@ -87,7 +87,7 @@ OpenDevice.errcheck = check_error
 
 CloseDevice = lib.alcCloseDevice
 CloseDevice.argtypes = [ctypes.c_void_p]
-CloseDevice.restype = ctypes.c_char
+CloseDevice.restype = ctypes.c_uint8
 CloseDevice.errcheck = check_error
 
 GetError = lib.alcGetError
@@ -96,7 +96,7 @@ GetError.restype = ctypes.c_int
 
 IsExtensionPresent = lib.alcIsExtensionPresent
 IsExtensionPresent.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
-IsExtensionPresent.restype = ctypes.c_char
+IsExtensionPresent.restype = ctypes.c_uint8
 IsExtensionPresent.errcheck = check_error
 
 GetProcAddress = lib.alcGetProcAddress
@@ -126,7 +126,7 @@ CaptureOpenDevice.errcheck = check_error
 
 CaptureCloseDevice = lib.alcCaptureCloseDevice
 CaptureCloseDevice.argtypes = [ctypes.c_void_p]
-CaptureCloseDevice.restype = ctypes.c_char
+CaptureCloseDevice.restype = ctypes.c_uint8
 CaptureCloseDevice.errcheck = check_error
 
 CaptureStart = lib.alcCaptureStart
