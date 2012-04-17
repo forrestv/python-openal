@@ -8,9 +8,9 @@ import openal
 
 device = openal.Device()
 contextlistener = device.ContextListener()
-source = openal.Source()
-source2 = openal.Source()
-expsources = [openal.Source() for i in xrange(20)]
+source = contextlistener.get_source()
+source2 = contextlistener.get_source()
+expsources = [contextlistener.get_source() for i in xrange(20)]
 buffer = openal.Buffer(os.path.join('sounds', '440.wav'))
 buffer2 = openal.Buffer(os.path.join('sounds', 'water.wav'))
 expbuffers = [openal.Buffer(os.path.join('sounds', 'explodes', x)) for x in os.listdir(os.path.join('sounds', 'explodes')) if x[0] != '.']
@@ -37,7 +37,7 @@ amplitude2 = 0
 freq2 = 10
 explodetime = 0
 x = 0
-while True:
+for i in xrange(600):
     x = not x
     source2.position = 3, 3, 3*(2*x-1)
     while explodetime < 0:

@@ -25,7 +25,7 @@ cl.orientation = 1,0,0 , 0,0,1 # forward, up
 b = openal.Buffer(sys.argv[1])
 po(b)
 
-s = openal.Source()
+s = cl.get_source()
 po(s)
 
 s.buffer = b

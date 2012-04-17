@@ -1,8 +1,14 @@
 import ctypes
+import weakref
 
 from . import _al
 from . import _alc
 from . import _alut
+
+_refs = {}
+def call_on_del(obj, func, *args, **kwargs):
+    x = max(_refs.iterkeys()) + 1 if _refs else 0
+    _refs[x] = weakref.ref(obj, lambda ref: (_refs.pop(x), func(*args, **kwargs)))
 
 def call_array_fill(atype, elements, func, *args):
     x = (atype * len(elements))()
@@ -27,13 +33,8 @@ class Device(_NoSetAttr):
         #print repr(_alc.GetString(0, _alc.ALC_DEVICE_SPECIFIER))
         self._handle = _alc.OpenDevice(name)
         assert self._handle
-    def __del__(self):
-        if hasattr(self, "_handle"):
-            try:
-                _alc.CloseDevice(self._handle)
-            except:
-                pass
-            del self._handle
+        call_on_del(self, _alc.CloseDevice, self._handle)
+    
     def ContextListener(self, *args, **kwargs):
         return ContextListener(self, *args, **kwargs)
 
@@ -43,14 +44,12 @@ class ContextListener(_NoSetAttr):
         self._handle = _alc.CreateContext(self._device._handle, None) # XXX
         assert self._handle
         _alc.MakeContextCurrent(self._handle)
-    def __del__(self):
-        _alc.MakeContextCurrent(None)
-        if hasattr(self, "_handle"):
-            try:
-                _alc.DestroyContext(self._handle)
-            except:
-                pass
-            del self._handle
+        
+        handle = self._handle
+        call_on_del(self, lambda: (_alc.MakeContextCurrent(None), _alc.DestroyContext(handle)))
+    
+    def get_source(self):
+        return Source(self)
     
     def process(self):
         _alc.ProcessContext(self._handle)
@@ -114,17 +113,14 @@ class ContextListener(_NoSetAttr):
     ) # forward, up
 
 class Source(_NoSetAttr):
-    def __init__(self):
+    def __init__(self, cl):
+        self._cl = cl
+        self._buffer = None
+        
         x = ctypes.c_uint()
         _al.GenSources(1, ctypes.byref(x))
         self._handle = x.value
-    def __del__(self):
-        if hasattr(self, "_handle"):
-            try:
-                _al.DeleteSources(1, ctypes.byref(ctypes.c_uint(self._handle)))
-            except:
-                pass
-            del self._handle
+        call_on_del(self, _al.DeleteSources, 1, ctypes.byref(ctypes.c_uint(self._handle)))
     
     def queue_buffers(self, buffers):
         raise NotImplementedError
@@ -164,10 +160,14 @@ class Source(_NoSetAttr):
         lambda self: call_array(ctypes.c_int, 1, _al.GetSourcei, self._handle, _al.LOOPING)[0],
         lambda self, v: _al.Sourcei(self._handle, _al.LOOPING, v),
     )
-    buffer = property(
-        lambda self: call_array(ctypes.c_int, 1, _al.GetSourcei, self._handle, _al.BUFFER)[0], # XXX
-        lambda self, v: _al.Sourcei(self._handle, _al.BUFFER, _al.NONE if v is None else v._handle),
-    )
+    
+    def _get_buffer(self):
+        return self._buffer
+    def _set_buffer(self, v):
+        _al.Sourcei(self._handle, _al.BUFFER, _al.NONE if v is None else v._handle)
+        self._buffer = v
+    buffer = property(_get_buffer, _set_buffer)
+    
     buffers_queued = property(
         lambda self: call_array(ctypes.c_int, 1, _al.GetSourcei, self._handle, _al.BUFFERS_QUEUED)[0],
     )
@@ -224,32 +224,27 @@ class Source(_NoSetAttr):
     )
 
 class Buffer(_NoSetAttr):
-    def __init__(self, filename=None, data=None):
-        assert filename is None or data is None
+    def __init__(self, filename=None, data=None, rawdata=None):
+        assert (filename is not None) + (data is not None) + (rawdata is not None) == 1
+        
         if filename is not None:
             self._handle = _alut.CreateBufferFromFile(filename)
         elif data is not None:
             self._handle = _alut.CreateBufferFromFileImage(data, len(data))
         else:
+            channels, bits, frequency, data2 = rawdata
             x = ctypes.c_uint()
             _al.GenBuffers(1, ctypes.byref(x))
             self._handle = x.value
-    def __del__(self):
-        if hasattr(self, "_handle"):
-            try:
-                _al.DeleteBuffers(1, ctypes.byref(ctypes.c_uint(self._handle)))
-            except:
-                pass
-            del self._handle
-    
-    def set_data(self, channels, bits, frequency, data):
-        format = {
-            (1, 8): _al.FORMAT_MONO8,
-            (1, 16): _al.FORMAT_MONO16,
-            (2, 8): _al.FORMAT_STEREO8,
-            (2, 16): _al.FORMAT_STEREO16,
-        }[channels, bits]
-        _al.BufferData(self._handle, format, data, len(data), frequency)
+            format = {
+                (1, 8): _al.FORMAT_MONO8,
+                (1, 16): _al.FORMAT_MONO16,
+                (2, 8): _al.FORMAT_STEREO8,
+                (2, 16): _al.FORMAT_STEREO16,
+            }[channels, bits]
+            _al.BufferData(self._handle, format, data2, len(data2), frequency)
+        
+        call_on_del(self, _al.DeleteBuffers, 1, ctypes.byref(ctypes.c_uint(self._handle)))
     
     frequency = property(
         lambda self: call_array(ctypes.c_int, 1, _al.GetBufferi, self._handle, _al.FREQUENCY)[0],
