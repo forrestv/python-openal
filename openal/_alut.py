@@ -1,7 +1,10 @@
 import ctypes
 import ctypes.util
 
-lib = ctypes.CDLL(ctypes.util.find_library("alut"))
+lib_path = ctypes.util.find_library('alut')
+if lib_path is None:
+    raise ImportError('alut library not found')
+lib = ctypes.CDLL(lib_path)
 
 ERROR_NO_ERROR = 0
 ERROR_OUT_OF_MEMORY = 0x200
@@ -38,28 +41,28 @@ for k, v in locals().items():
     if not k.startswith('error '): continue
     errors[v] = k[len('error '):]
 
-class Error(Exception):
+class ALUTError(Exception):
     pass
 
 def check_error(result, func, arguments):
     err = GetError()
     if err:
-        raise Error(errors[err])
+        raise ALUTError, errors[err]
     return result
 
 Init = lib.alutInit
 Init.argtypes = [ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_char_p)]
-Init.restype = ctypes.c_bool
+Init.restype = ctypes.c_char
 Init.errcheck = check_error
 
 InitWithoutContext = lib.alutInitWithoutContext
 InitWithoutContext.argtypes = [ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_char_p)]
-InitWithoutContext.restype = ctypes.c_bool
+InitWithoutContext.restype = ctypes.c_char
 InitWithoutContext.errcheck = check_error
 
 Exit = lib.alutExit
 Exit.argtypes = []
-Exit.restype = ctypes.c_bool
+Exit.restype = ctypes.c_char
 Exit.errcheck = check_error
 
 GetError = lib.alutGetError
@@ -128,5 +131,5 @@ GetMinorVersion.errcheck = check_error
 
 Sleep = lib.alutSleep
 Sleep.argtypes = [ctypes.c_float]
-Sleep.restype = ctypes.c_bool
+Sleep.restype = ctypes.c_char
 Sleep.errcheck = check_error

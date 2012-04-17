@@ -1,7 +1,10 @@
 import ctypes
 import ctypes.util
 
-lib = ctypes.CDLL(ctypes.util.find_library("openal"))
+lib_path = ctypes.util.find_library('openal')
+if lib_path is None:
+    raise ImportError('openal library not found')
+lib = ctypes.CDLL(lib_path)
 
 NONE = 0
 FALSE = 0
@@ -75,13 +78,13 @@ for k, v in locals().items():
     assert v not in errors
     errors[v] = k.replace('_', ' ').lower()
 
-class Error(Exception):
+class ALError(Exception):
     pass
 
 def check_error(result, func, arguments):
     err = GetError()
     if err:
-        raise Error(errors[err])
+        raise ALError, errors[err]
     return result
 
 Enable = lib.alEnable
@@ -96,7 +99,7 @@ Disable.errcheck = check_error
 
 IsEnabled = lib.alIsEnabled
 IsEnabled.argtypes = [ctypes.c_int]
-IsEnabled.restype = ctypes.c_bool
+IsEnabled.restype = ctypes.c_char
 IsEnabled.errcheck = check_error
 
 GetString = lib.alGetString
@@ -105,7 +108,7 @@ GetString.restype = ctypes.c_char_p
 GetString.errcheck = check_error
 
 GetBooleanv = lib.alGetBooleanv
-GetBooleanv.argtypes = [ctypes.c_int, ctypes.POINTER(ctypes.c_bool)]
+GetBooleanv.argtypes = [ctypes.c_int, ctypes.c_char_p]
 GetBooleanv.restype = None
 GetBooleanv.errcheck = check_error
 
@@ -126,7 +129,7 @@ GetDoublev.errcheck = check_error
 
 GetBoolean = lib.alGetBoolean
 GetBoolean.argtypes = [ctypes.c_int]
-GetBoolean.restype = ctypes.c_bool
+GetBoolean.restype = ctypes.c_char
 GetBoolean.errcheck = check_error
 
 GetInteger = lib.alGetInteger
@@ -150,7 +153,7 @@ GetError.restype = ctypes.c_int
 
 IsExtensionPresent = lib.alIsExtensionPresent
 IsExtensionPresent.argtypes = [ctypes.c_char_p]
-IsExtensionPresent.restype = ctypes.c_bool
+IsExtensionPresent.restype = ctypes.c_char
 IsExtensionPresent.errcheck = check_error
 
 GetProcAddress = lib.alGetProcAddress
@@ -235,7 +238,7 @@ DeleteSources.errcheck = check_error
 
 IsSource = lib.alIsSource
 IsSource.argtypes = [ctypes.c_uint]
-IsSource.restype = ctypes.c_bool
+IsSource.restype = ctypes.c_char
 IsSource.errcheck = check_error
 
 Sourcef = lib.alSourcef
@@ -360,7 +363,7 @@ DeleteBuffers.errcheck = check_error
 
 IsBuffer = lib.alIsBuffer
 IsBuffer.argtypes = [ctypes.c_uint]
-IsBuffer.restype = ctypes.c_bool
+IsBuffer.restype = ctypes.c_char
 IsBuffer.errcheck = check_error
 
 BufferData = lib.alBufferData
